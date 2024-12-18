@@ -93,7 +93,7 @@ async def stream():
                         )
                         if vulnerability_ids:
                             print(uri)
-                            url = await asyncio.run(get_url_from_uri(uri))
+                            url = await get_url_from_uri(uri)
                             print(url)
                             print(
                                 "Vulnerability IDs detected:",
