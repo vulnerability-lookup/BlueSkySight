@@ -58,7 +58,7 @@ async def stream():
             if head["t"] == "#commit":
                 body = await parse_dag_cbor_object(
                     stream
-                )  # XXX: does this repeat "op" times?
+                )
                 root, nodes = await parse_car(
                     io.BytesIO(body["blocks"]), len(body["blocks"])
                 )
@@ -68,12 +68,11 @@ async def stream():
                         and op["action"] == "create"
                     ):
                         signed_commit = nodes[root]
-                        # this is here you'd verify the signature, if you're into that kinda thing
+                        # verify the signature
                         records = await enumerate_mst_records(
                             nodes, nodes[signed_commit["data"]]
                         )
                         post = nodes[records[op["path"].encode()]]
-                        # post = nodes[op["cid"]] # non-tree-walky approach, can't verify authenticity this way
                         uri = f'at://{body["repo"]}/{op["path"]}'
                         content = post["text"]
                         # print(uri ,content)
