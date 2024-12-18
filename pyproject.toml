@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "blueskysight"
 version = "0.1.0"
-description = ""
+description = "A client to gather vulnerability-related information from Bluesky."
 authors = ["Cédric Bonhomme <cedric.bonhomme@circl.lu>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
@@ -17,6 +17,11 @@ cbor2 = "^5.6.5"
 zstandard = "^0.23.0"
 httpx = "^0.28.1"
 
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.13.0"
+flake8 = "^6.0.0"
+pre-commit = "^4.0.1"
+types-requests = "^2.32.0.20241016"
 
 [build-system]
 requires = ["poetry-core"]

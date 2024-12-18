@@ -7,13 +7,12 @@ from pyvulnerabilitylookup import PyVulnerabilityLookup
 
 from blueskysight import config
 from blueskysight.utils import (
-    parse_dag_cbor_object,
-    parse_car,
     enumerate_mst_records,
-    remove_case_insensitive_duplicates,
     get_url_from_uri,
+    parse_car,
+    parse_dag_cbor_object,
+    remove_case_insensitive_duplicates,
 )
-
 
 vulnerability_pattern = re.compile(
     r"\b(CVE-\d{4}-\d{4,})\b"  # CVE pattern
@@ -93,6 +92,7 @@ async def stream():
                             vulnerability_ids
                         )
                         if vulnerability_ids:
+                            print(uri)
                             url = await asyncio.run(get_url_from_uri(uri))
                             print(url)
                             print(

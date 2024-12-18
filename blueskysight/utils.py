@@ -1,9 +1,10 @@
 import base64
 import hashlib
-import httpx
 import io
 import struct
 from enum import Enum
+
+import httpx
 
 
 def remove_case_insensitive_duplicates(input_list):
