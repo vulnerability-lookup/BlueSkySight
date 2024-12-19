@@ -46,7 +46,7 @@ async def get_post_url(at_uri):
         return f"https://bsky.app/profile/{handle}/post/{post_id}"
     else:
         print("Failed to resolve handle.")
-        return None
+        return at_uri
 
 
 # ground control to major type
