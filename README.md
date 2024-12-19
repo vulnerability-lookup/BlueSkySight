@@ -18,19 +18,17 @@ $ export BLUESKYSIGHT_CONFIG=~/.BlueSkySight/conf.py
 The configuration for BlueSkySight should be defined in a Python file (e.g., ``~/.BlueSkySight/conf.py``).
 You must then set an environment variable (``BLUESKYSIGHT_CONFIG``) with the full path to this file.
 
-You can have a look at [this example](https://github.com/CIRCL/FediVuln/blob/main/blueskysight/conf_sample.py) of configuration.
+You can have a look at [this example](https://github.com/CIRCL/BlueSkySight/blob/main/blueskysight/conf_sample.py) of configuration.
 
 ### Streaming
 
 
-``BlueSkySight-Stream`` streams data from the Fediverse and uses PyVulnerabilityLookup to create sightings in Vulnerability-Lookup.
+``BlueSkySight-Stream`` streams data from the Bluesky firehose and uses PyVulnerabilityLookup to create sightings in Vulnerability-Lookup.
 
 ```bash
 $ BlueSkySight-Stream
 Streaming Bluesky firehose…
 ```
-
-
 
 
 ## License

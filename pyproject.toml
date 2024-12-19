@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "blueskysight"
+name = "BlueSkySight"
 version = "0.1.0"
 description = "A client to gather vulnerability-related information from Bluesky."
 authors = ["Cédric Bonhomme <cedric.bonhomme@circl.lu>"]
