@@ -51,6 +51,7 @@ async def stream():
     async with websockets.connect(
         "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"
     ) as websocket:
+        print("Streaming Bluesky firehose…")
         while True:
             res = await websocket.recv()
             stream = io.BytesIO(res)
@@ -89,9 +90,9 @@ async def stream():
                             vulnerability_ids
                         )
                         if vulnerability_ids:
-                            print(uri)
+                            # print(uri)
                             url = await get_post_url(uri)
-                            print(url)
+                            # print(url)
                             print(
                                 "Vulnerability IDs detected:",
                                 ", ".join(vulnerability_ids),
