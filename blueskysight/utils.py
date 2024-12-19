@@ -139,7 +139,7 @@ async def parse_dag_cbor_object(stream):
         values = {}
         for _ in range(info):
             key = await parse_dag_cbor_object(stream)
-            if type(key) != str:
+            if not isinstance(key, str):
                 raise ValueError("DAG-CBOR only accepts strings as map keys")
             values[key] = await parse_dag_cbor_object(stream)
         # TODO: check canonical map ordering
