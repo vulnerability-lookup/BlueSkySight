@@ -8,7 +8,7 @@ from pyvulnerabilitylookup import PyVulnerabilityLookup
 from blueskysight import config
 from blueskysight.utils import (
     enumerate_mst_records,
-    get_url_from_uri,
+    get_post_url,
     parse_car,
     parse_dag_cbor_object,
     remove_case_insensitive_duplicates,
@@ -56,9 +56,7 @@ async def stream():
             stream = io.BytesIO(res)
             head = await parse_dag_cbor_object(stream)
             if head["t"] == "#commit":
-                body = await parse_dag_cbor_object(
-                    stream
-                )
+                body = await parse_dag_cbor_object(stream)
                 root, nodes = await parse_car(
                     io.BytesIO(body["blocks"]), len(body["blocks"])
                 )
@@ -92,7 +90,7 @@ async def stream():
                         )
                         if vulnerability_ids:
                             print(uri)
-                            url = await get_url_from_uri(uri)
+                            url = await get_post_url(uri)
                             print(url)
                             print(
                                 "Vulnerability IDs detected:",

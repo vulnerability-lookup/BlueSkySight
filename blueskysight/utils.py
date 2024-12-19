@@ -16,26 +16,32 @@ def remove_case_insensitive_duplicates(input_list):
     return list({item.lower(): item for item in input_list}.values())
 
 
-async def resolve_did_to_handle(did):
-    """Resolve a DID to a handle using the Bluesky API."""
-    url = f"https://bsky.social/xrpc/app.bsky.identity.resolveHandle?did={did}"
+async def resolve_did_to_handle_via_plc(did):
+    """Resolve a DID to a handle using plc.directory."""
+    url = f"https://plc.directory/{did}"
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         if response.status_code == 200:
             data = response.json()
-            return data.get("handle")
+            also_known_as = data.get("alsoKnownAs", [])
+            # Extract the handle from the URL
+            for entry in also_known_as:
+                if entry.startswith("https://"):
+                    return entry.replace("https://", "")
+                elif entry.startswith("at://"):
+                    return entry.replace("at://", "")
         else:
             print(f"Failed to resolve DID {did}: {response.status_code}")
             return None
 
 
-async def get_url_from_uri(uri):
-    """Convert an AT Protocol URI to a public Bluesky URL."""
-    parts = uri.split("/")
-    did = parts[2]
-    post_id = parts[-1]
+async def get_post_url(at_uri):
+    """Convert an AT Protocol URI to a Bluesky public post URL."""
+    parts = at_uri.split("/")
+    did = parts[2]  # Extract the DID
+    post_id = parts[-1]  # Extract the post ID
 
-    handle = await resolve_did_to_handle(did)
+    handle = await resolve_did_to_handle_via_plc(did)
     if handle:
         return f"https://bsky.app/profile/{handle}/post/{post_id}"
     else:
