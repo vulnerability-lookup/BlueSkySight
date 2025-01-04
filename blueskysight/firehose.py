@@ -310,7 +310,7 @@ def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids):
 async def firehose():
     """
     Connects to the Bluesky firehose WebSocket stream, processes frames,
-    and extracts vulnerability sightings.
+    and extracts vulnerability sightings from textual content.
     """
     while True:
         try:
@@ -347,7 +347,7 @@ async def process_firehose(ws):
 
 async def process_commit_frame(body):
     """
-    Processes a #commit frame to extract relevant vulnerability sightings.
+    Processes a #commit frame to extract relevant textual content and vulnerability sightings.
     """
     repo = body.get("repo", "")
     ops = body.get("ops", [])
@@ -363,10 +363,13 @@ async def process_commit_frame(body):
 
 async def process_blocks(uri, blocks):
     """
-    Processes blocks from a commit frame to find vulnerabilities and handle sightings.
+    Processes blocks to find textual content and extract vulnerability sightings.
     """
-    for block in blocks:
-        content = block["data"].get("text", "")
+    # Extract only blocks containing textual content
+    textual_blocks = extract_textual_content(blocks)
+
+    for block in textual_blocks:
+        content = block["data"]["text"]
         if content:
             vulnerability_ids = extract_vulnerability_ids(content)
             if vulnerability_ids:
@@ -375,6 +378,18 @@ async def process_blocks(uri, blocks):
                 print(f"Post URL: {url}")
                 print(f"Vulnerability IDs detected: {', '.join(vulnerability_ids)}")
                 push_sighting_to_vulnerability_lookup(url, vulnerability_ids)
+
+
+def extract_textual_content(blocks):
+    """
+    Filters blocks to extract only those containing textual content.
+    """
+    return [
+        block
+        for block in blocks
+        if block["data"].get("$type") == "app.bsky.feed.post"
+        and "text" in block["data"]
+    ]
 
 
 def extract_vulnerability_ids(content):
