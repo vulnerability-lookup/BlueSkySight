@@ -308,49 +308,84 @@ def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids):
 
 
 async def firehose():
-    async with websockets.connect(
-        "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos", ping_interval=None
-    ) as ws:
-        while True:
+    """
+    Connects to the Bluesky firehose WebSocket stream, processes frames,
+    and extracts vulnerability sightings.
+    """
+    while True:
+        try:
+            print("Connecting to the Bluesky firehose...")
+            async with websockets.connect(
+                BSKY_FIREHOSE, ping_interval=20, ping_timeout=10
+            ) as ws:
+                print("Connection established.")
+                await process_firehose(ws)
+        except websockets.ConnectionClosedError as e:
+            print(f"Connection closed unexpectedly: {e}. Reconnecting...")
+        except Exception as e:
+            print(f"Unexpected error: {e}. Reconnecting...")
+        finally:
+            await asyncio.sleep(5)  # Delay before attempting reconnection
+
+
+async def process_firehose(ws):
+    """
+    Processes incoming frames from the WebSocket stream.
+    """
+    while True:
+        try:
             cbor_frame = await ws.recv()
             header, body = read_firehose_frame(cbor_frame)
-            frame = {"header": header, "body": body}
-            # print(json.dumps(frame, cls=JSONEncoderWithBytes))
+            if header.get("t") == "#commit":
+                await process_commit_frame(body)
+        except websockets.ConnectionClosedError:
+            print("WebSocket connection lost during processing.")
+            raise
+        except Exception as e:
+            print(f"Error while processing frame: {e}")
 
-            if frame["header"]["t"] == "#commit":
-                for op in body["ops"]:
-                    if (
-                        op["path"].startswith("app.bsky.feed.post/")
-                        and op["action"] == "create"
-                    ):
-                        uri = f'at://{body["repo"]}/{op["path"]}'
-                        for block in body["blocks"]["blocks"]:
-                            content = block["data"].get("text", "")
-                            if content:
-                                matches = vulnerability_pattern.findall(
-                                    content
-                                )  # Find all matches in the content
-                                # Flatten the list of tuples to get only non-empty matched strings
-                                vulnerability_ids = [
-                                    match
-                                    for match_tuple in matches
-                                    for match in match_tuple
-                                    if match
-                                ]
-                                vulnerability_ids = remove_case_insensitive_duplicates(
-                                    vulnerability_ids
-                                )
-                                if vulnerability_ids:
-                                    print(content)
-                                    url = await get_post_url(uri)
-                                    print(url)
-                                    print(
-                                        "Vulnerability IDs detected:",
-                                        ", ".join(vulnerability_ids),
-                                    )
-                                    push_sighting_to_vulnerability_lookup(
-                                        url, vulnerability_ids
-                                    )
+
+async def process_commit_frame(body):
+    """
+    Processes a #commit frame to extract relevant vulnerability sightings.
+    """
+    repo = body.get("repo", "")
+    ops = body.get("ops", [])
+    blocks = body.get("blocks", {}).get("blocks", [])
+
+    for op in ops:
+        if op.get("action") == "create" and op.get("path", "").startswith(
+            "app.bsky.feed.post/"
+        ):
+            uri = f'at://{repo}/{op["path"]}'
+            await process_blocks(uri, blocks)
+
+
+async def process_blocks(uri, blocks):
+    """
+    Processes blocks from a commit frame to find vulnerabilities and handle sightings.
+    """
+    for block in blocks:
+        content = block["data"].get("text", "")
+        if content:
+            vulnerability_ids = extract_vulnerability_ids(content)
+            if vulnerability_ids:
+                print(f"Post content: {content}")
+                url = await get_post_url(uri)
+                print(f"Post URL: {url}")
+                print(f"Vulnerability IDs detected: {', '.join(vulnerability_ids)}")
+                push_sighting_to_vulnerability_lookup(url, vulnerability_ids)
+
+
+def extract_vulnerability_ids(content):
+    """
+    Extracts vulnerability IDs from post content using the predefined regex pattern.
+    """
+    matches = vulnerability_pattern.findall(content)
+    # Flatten the list of tuples to get only non-empty matched strings
+    return remove_case_insensitive_duplicates(
+        [match for match_tuple in matches for match in match_tuple if match]
+    )
 
 
 def main():
