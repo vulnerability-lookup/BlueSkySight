@@ -48,58 +48,86 @@ def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids):
 
 
 async def stream():
-    async with websockets.connect(
-        "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"
-    ) as websocket:
-        print("Streaming Bluesky firehose…")
-        while True:
+    """
+    Connects to the Bluesky firehose WebSocket stream, processes incoming frames,
+    and extracts vulnerability sightings.
+    Includes automatic reconnection handling.
+    """
+    while True:
+        try:
+            print("Connecting to Bluesky firehose...")
+            async with websockets.connect(
+                "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos",
+                ping_interval=20,
+                ping_timeout=10,
+            ) as websocket:
+                print("Streaming Bluesky firehose…")
+                await process_stream(websocket)
+        except websockets.ConnectionClosedError as e:
+            print(f"Connection closed unexpectedly: {e}. Reconnecting...")
+        except Exception as e:
+            print(f"Unexpected error: {e}. Reconnecting...")
+        finally:
+            await asyncio.sleep(5)  # Delay before retrying to connect
+
+
+async def process_stream(websocket):
+    """
+    Processes the WebSocket stream and extracts relevant data.
+    """
+    while True:
+        try:
             res = await websocket.recv()
             stream = io.BytesIO(res)
+
+            # Parse the header of the DAG CBOR object
             head = await parse_dag_cbor_object(stream)
-            if head["t"] == "#commit":
+            if head.get("t") == "#commit":
+                # Parse the body of the DAG CBOR object
                 body = await parse_dag_cbor_object(stream)
                 root, nodes = await parse_car(
                     io.BytesIO(body["blocks"]), len(body["blocks"])
                 )
-                for op in body["ops"]:
+
+                for op in body.get("ops", []):
                     if (
                         op["path"].startswith("app.bsky.feed.post/")
                         and op["action"] == "create"
                     ):
-                        signed_commit = nodes[root]
-                        # verify the signature
-                        records = await enumerate_mst_records(
-                            nodes, nodes[signed_commit["data"]]
-                        )
-                        post = nodes[records[op["path"].encode()]]
-                        uri = f'at://{body["repo"]}/{op["path"]}'
-                        content = post["text"]
-                        # print(uri ,content)
+                        await process_op(op, body, root, nodes)
+        except websockets.ConnectionClosedError:
+            print("WebSocket connection lost during streaming.")
+            raise
+        except Exception as e:
+            print(f"Error while processing stream: {e}")
 
-                        matches = vulnerability_pattern.findall(
-                            content
-                        )  # Find all matches in the content
-                        # Flatten the list of tuples to get only non-empty matched strings
-                        vulnerability_ids = [
-                            match
-                            for match_tuple in matches
-                            for match in match_tuple
-                            if match
-                        ]
-                        vulnerability_ids = remove_case_insensitive_duplicates(
-                            vulnerability_ids
-                        )
-                        if vulnerability_ids:
-                            # print(uri)
-                            url = await get_post_url(uri)
-                            # print(url)
-                            print(
-                                "Vulnerability IDs detected:",
-                                ", ".join(vulnerability_ids),
-                            )
-                            push_sighting_to_vulnerability_lookup(
-                                url, vulnerability_ids
-                            )
+
+async def process_op(op, body, root, nodes):
+    """
+    Processes an operation from the stream and extracts vulnerabilities.
+    """
+    signed_commit = nodes[root]
+    records = await enumerate_mst_records(nodes, nodes[signed_commit["data"]])
+    post = nodes[records[op["path"].encode()]]
+    uri = f'at://{body["repo"]}/{op["path"]}'
+    content = post.get("text", "")
+
+    if content:
+        # Match vulnerabilities in the content
+        matches = vulnerability_pattern.findall(content)
+        vulnerability_ids = [
+            match for match_tuple in matches for match in match_tuple if match
+        ]
+        vulnerability_ids = remove_case_insensitive_duplicates(vulnerability_ids)
+
+        if vulnerability_ids:
+            url = await get_post_url(uri)
+            print(f"Post URL: {url}")
+            print(
+                "Vulnerability IDs detected:",
+                ", ".join(vulnerability_ids),
+            )
+            push_sighting_to_vulnerability_lookup(url, vulnerability_ids)
 
 
 def main():
