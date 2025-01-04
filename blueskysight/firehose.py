@@ -1,26 +1,17 @@
 import asyncio
 import json
-import re
 import struct
 import typing as t
 from base64 import b32encode
 from io import BytesIO
 
 import websockets
-from pyvulnerabilitylookup import PyVulnerabilityLookup
 
-from blueskysight import config
-from blueskysight.utils import get_post_url, remove_case_insensitive_duplicates
-
-vulnerability_pattern = re.compile(
-    r"\b(CVE-\d{4}-\d{4,})\b"  # CVE pattern
-    r"|\b(GHSA-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4})\b"  # GHSA pattern
-    r"|\b(PYSEC-\d{4}-\d{2,5})\b"  # PYSEC pattern
-    r"|\b(GSD-\d{4}-\d{4,5})\b"  # GSD pattern
-    r"|\b(wid-sec-w-\d{4}-\d{4})\b"  # CERT-Bund pattern
-    r"|\b(cisco-sa-\d{8}-[a-zA-Z0-9]+)\b"  # CISCO pattern
-    r"|\b(RHSA-\d{4}:\d{4})\b",  # RedHat pattern
-    re.IGNORECASE,
+from blueskysight.utils import (
+    get_post_url,
+    push_sighting_to_vulnerability_lookup,
+    remove_case_insensitive_duplicates,
+    vulnerability_pattern,
 )
 
 BSKY_FIREHOSE = "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"
@@ -284,27 +275,6 @@ def read_firehose_frame(frame: bytes) -> tuple[dict, dict]:
         if isinstance(body_blocks, bytes):
             body["blocks"] = read_carv1(BytesIO(body_blocks))
         return header, body
-
-
-def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids):
-    """Create a sighting from an incoming status and push it to the Vulnerability Lookup instance."""
-    print("Pushing sighting to Vulnerability Lookup…")
-    vuln_lookup = PyVulnerabilityLookup(
-        config.vulnerability_lookup_base_url, token=config.vulnerability_auth_token
-    )
-    for vuln in vulnerability_ids:
-        # Create the sighting
-        sighting = {"type": "seen", "source": status_uri, "vulnerability": vuln}
-
-        # Post the JSON to Vulnerability Lookup
-        try:
-            r = vuln_lookup.create_sighting(sighting=sighting)
-            if "message" in r:
-                print(r["message"])
-        except Exception as e:
-            print(
-                f"Error when sending POST request to the Vulnerability Lookup server:\n{e}"
-            )
 
 
 async def firehose():
