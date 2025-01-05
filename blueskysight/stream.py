@@ -31,9 +31,9 @@ async def stream():
                 print("Streaming Bluesky firehose…")
                 await process_stream(websocket)
         except websockets.ConnectionClosedError as e:
-            print(f"Connection closed unexpectedly: {e}. Reconnecting...")
+            print(f"Connection closed unexpectedly: {e}. Reconnecting…")
         except Exception as e:
-            print(f"Unexpected error: {e}. Reconnecting...")
+            print(f"Unexpected error: {e}. Reconnecting…")
         finally:
             await asyncio.sleep(5)  # Delay before retrying to connect
 

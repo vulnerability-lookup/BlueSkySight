@@ -284,16 +284,16 @@ async def firehose():
     """
     while True:
         try:
-            print("Connecting to the Bluesky firehose...")
+            print("Connecting to the Bluesky firehose…")
             async with websockets.connect(
                 BSKY_FIREHOSE, ping_interval=20, ping_timeout=10
             ) as ws:
                 print("Connection established.")
                 await process_firehose(ws)
         except websockets.ConnectionClosedError as e:
-            print(f"Connection closed unexpectedly: {e}. Reconnecting...")
+            print(f"Connection closed unexpectedly: {e}. Reconnecting…")
         except Exception as e:
-            print(f"Unexpected error: {e}. Reconnecting...")
+            print(f"Unexpected error: {e}. Reconnecting…")
         finally:
             await asyncio.sleep(5)  # Delay before attempting reconnection
 

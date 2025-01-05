@@ -222,6 +222,7 @@ async def jetstream(
     base_url = base_url or get_public_jetstream_base_url(geo, instance)
     url = get_jetstream_query_url(base_url, collections, dids, cursor, compress)
 
+    print("Connecting to the Bluesky Jetstream…")
     with connect_ws(url) as ws:
         while True:
             if decompressor:
