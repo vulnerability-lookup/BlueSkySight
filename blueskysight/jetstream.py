@@ -4,11 +4,11 @@ import json
 import os
 import platform
 import typing as t
+import websockets
 from pathlib import Path
 from urllib.parse import urlencode
 
 import zstandard as zstd
-from httpx_ws import connect_ws
 
 from blueskysight.utils import (
     extract_vulnerability_ids,
@@ -199,7 +199,7 @@ async def jetstream(
     instance: int = 1,
     compress: bool = False,
 ):
-    """Emit Jetstream JSON messages, one per line."""
+    """Emit Jetstream JSON messages, one per line, with reconnection handling."""
     # Resolve handles and form the final list of DIDs to subscribe to.
     handle_dids = [require_resolve_handle_to_did(handle) for handle in handles]
     dids = list(dids) + handle_dids
@@ -211,33 +211,58 @@ async def jetstream(
     base_url = base_url or get_public_jetstream_base_url(geo, instance)
     url = get_jetstream_query_url(base_url, collections, dids, cursor, compress)
 
-    print("Connecting to the Bluesky Jetstream…")
-    with connect_ws(url) as ws:
-        while True:
-            if decompressor:
-                message = ws.receive_bytes()
-                with decompressor.stream_reader(message) as reader:
-                    message = reader.read()
-                message = message.decode("utf-8")
-            else:
-                message = ws.receive_text()
-            json_message = json.loads(message)
-            if (
-                "commit" in json_message
-                and json_message["commit"]["operation"] == "create"
-            ):
-                content = json_message["commit"]["record"].get("text", "")
-                if content:
-                    vulnerability_ids = extract_vulnerability_ids(content)
-                    if vulnerability_ids:
-                        uri = f'at://{json_message["did"]}/app.bsky.feed.post/{json_message["commit"]["rkey"]}'
-                        url = await get_post_url(uri)
-                        print(f"Post content: {content}")
-                        print(f"Post URL: {url}")
-                        print(
-                            f"Vulnerability IDs detected: {', '.join(vulnerability_ids)}"
-                        )
-                        push_sighting_to_vulnerability_lookup(url, vulnerability_ids)
+    while True:
+        try:
+            print(f"Connecting to the Bluesky Jetstream at {url}…")
+            async with websockets.connect(
+                url, ping_interval=20, ping_timeout=10
+            ) as ws:
+                print("Connection established. Listening for messages…")
+                while True:
+                    try:
+                        if compress and decompressor:
+                            message = await ws.recv()
+                            with decompressor.stream_reader(message) as reader:
+                                message = reader.read()
+                            message = message.decode("utf-8")
+                        else:
+                            message = await ws.recv()
+
+                        json_message = json.loads(message)
+
+                        # Process the incoming message
+                        await process_jetstream_message(json_message)
+
+                    except websockets.ConnectionClosedError as e:
+                        print(f"WebSocket connection closed: {e}")
+                        break  # Exit to reconnect
+                    except Exception as e:
+                        print(f"Error processing message: {e}")
+
+        except Exception as e:
+            print(f"Connection error: {e}. Reconnecting in 5 seconds…")
+            await asyncio.sleep(5)
+
+
+async def process_jetstream_message(json_message):
+    """
+    Processes a Jetstream message and extracts vulnerabilities.
+    """
+    if (
+        "commit" in json_message
+        and json_message["commit"]["operation"] == "create"
+    ):
+        content = json_message["commit"]["record"].get("text", "")
+        if content:
+            vulnerability_ids = extract_vulnerability_ids(content)
+            if vulnerability_ids:
+                uri = f'at://{json_message["did"]}/app.bsky.feed.post/{json_message["commit"]["rkey"]}'
+                url = await get_post_url(uri)
+                print(f"Post content: {content}")
+                print(f"Post URL: {url}")
+                print(f"Vulnerability IDs detected: {', '.join(vulnerability_ids)}")
+                push_sighting_to_vulnerability_lookup(url, vulnerability_ids)
+
 
 
 def main():

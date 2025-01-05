@@ -28,7 +28,7 @@ async def stream():
                 ping_interval=20,
                 ping_timeout=10,
             ) as websocket:
-                print("Streaming Bluesky firehose…")
+                print("Connection established.")
                 await process_stream(websocket)
         except websockets.ConnectionClosedError as e:
             print(f"Connection closed unexpectedly: {e}. Reconnecting…")

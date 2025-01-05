@@ -27,7 +27,8 @@ You can have a look at [this example](https://github.com/CIRCL/BlueSkySight/blob
 
 ```bash
 $ BlueSkySight-Firehose   
-Streaming Bluesky firehose…
+Connecting to the Bluesky firehose…
+Connection established.
 ```
 
 ### Streaming a Jetstream service
@@ -45,6 +46,11 @@ options:
   --geo {us-east,us-west}
                         Region of the Jetstream service.
   --instance {1,2}      Instance of the Jetstream service.
+
+
+$ BlueSkySight-Jetstream 
+Connecting to the Bluesky Jetstream at wss://jetstream1.us-west.bsky.network/subscribe?wantedCollections=app.bsky.feed.post…
+Connection established. Listening for messages…
 ```
 
 
