@@ -23,10 +23,10 @@ You can have a look at [this example](https://github.com/CIRCL/BlueSkySight/blob
 ### Streaming the Firehose
 
 
-``BlueSkySight-Stream`` streams data from the Bluesky firehose and uses PyVulnerabilityLookup to create sightings in Vulnerability-Lookup.
+``BlueSkySight-Firehose`` streams data from the Bluesky firehose and uses PyVulnerabilityLookup to create sightings in Vulnerability-Lookup.
 
 ```bash
-$ BlueSkySight-Stream   
+$ BlueSkySight-Firehose   
 Streaming Bluesky firehose…
 ```
 

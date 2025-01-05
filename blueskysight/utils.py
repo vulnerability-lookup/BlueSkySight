@@ -52,6 +52,17 @@ def remove_case_insensitive_duplicates(input_list):
     return list({item.lower(): item for item in input_list}.values())
 
 
+def extract_vulnerability_ids(content):
+    """
+    Extracts vulnerability IDs from post content using the predefined regex pattern.
+    """
+    matches = vulnerability_pattern.findall(content)
+    # Flatten the list of tuples to get only non-empty matched strings
+    return remove_case_insensitive_duplicates(
+        [match for match_tuple in matches for match in match_tuple if match]
+    )
+
+
 async def resolve_did_to_handle_via_plc(did):
     """Resolve a DID to a handle using plc.directory."""
     url = f"https://plc.directory/{did}"

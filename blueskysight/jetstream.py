@@ -11,10 +11,9 @@ import zstandard as zstd
 from httpx_ws import connect_ws
 
 from blueskysight.utils import (
+    extract_vulnerability_ids,
     get_post_url,
     push_sighting_to_vulnerability_lookup,
-    remove_case_insensitive_duplicates,
-    vulnerability_pattern,
 )
 
 PUBLIC_URL_FMT = "wss://jetstream{instance}.{geo}.bsky.network/subscribe"
@@ -190,17 +189,6 @@ def require_resolve_handle_to_did(handle: str) -> str:
     return did
 
 
-def extract_vulnerability_ids(content):
-    """
-    Extracts vulnerability IDs from post content using the predefined regex pattern.
-    """
-    matches = vulnerability_pattern.findall(content)
-    # Flatten the list of tuples to get only non-empty matched strings
-    return remove_case_insensitive_duplicates(
-        [match for match_tuple in matches for match in match_tuple if match]
-    )
-
-
 async def jetstream(
     collections: t.Sequence[str] = ["app.bsky.feed.post"],
     dids: t.Sequence[str] = [],
@@ -211,7 +199,7 @@ async def jetstream(
     instance: int = 1,
     compress: bool = False,
 ):
-    """Emit Jetstream JSON messages to the console, one per line."""
+    """Emit Jetstream JSON messages, one per line."""
     # Resolve handles and form the final list of DIDs to subscribe to.
     handle_dids = [require_resolve_handle_to_did(handle) for handle in handles]
     dids = list(dids) + handle_dids
