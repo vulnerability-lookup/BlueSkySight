@@ -1,7 +1,6 @@
 import base64
 import hashlib
 import io
-import re
 import struct
 from enum import Enum
 
@@ -9,17 +8,6 @@ import httpx
 from pyvulnerabilitylookup import PyVulnerabilityLookup
 
 from blueskysight import config
-
-vulnerability_pattern = re.compile(
-    r"\b(CVE-\d{4}-\d{4,})\b"  # CVE pattern
-    r"|\b(GHSA-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4})\b"  # GHSA pattern
-    r"|\b(PYSEC-\d{4}-\d{2,5})\b"  # PYSEC pattern
-    r"|\b(GSD-\d{4}-\d{4,5})\b"  # GSD pattern
-    r"|\b(wid-sec-w-\d{4}-\d{4})\b"  # CERT-Bund pattern
-    r"|\b(cisco-sa-\d{8}-[a-zA-Z0-9]+)\b"  # CISCO pattern
-    r"|\b(RHSA-\d{4}:\d{4})\b",  # RedHat pattern
-    re.IGNORECASE,
-)
 
 
 def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids):
@@ -56,7 +44,7 @@ def extract_vulnerability_ids(content):
     """
     Extracts vulnerability IDs from post content using the predefined regex pattern.
     """
-    matches = vulnerability_pattern.findall(content)
+    matches = config.vulnerability_patterns.findall(content)
     # Flatten the list of tuples to get only non-empty matched strings
     return remove_case_insensitive_duplicates(
         [match for match_tuple in matches for match in match_tuple if match]

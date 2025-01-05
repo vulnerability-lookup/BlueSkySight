@@ -214,9 +214,7 @@ async def jetstream(
     while True:
         try:
             print(f"Connecting to the Bluesky Jetstream at {url}…")
-            async with websockets.connect(
-                url, ping_interval=20, ping_timeout=10
-            ) as ws:
+            async with websockets.connect(url, ping_interval=20, ping_timeout=10) as ws:
                 print("Connection established. Listening for messages…")
                 while True:
                     try:
@@ -248,10 +246,7 @@ async def process_jetstream_message(json_message):
     """
     Processes a Jetstream message and extracts vulnerabilities.
     """
-    if (
-        "commit" in json_message
-        and json_message["commit"]["operation"] == "create"
-    ):
+    if "commit" in json_message and json_message["commit"]["operation"] == "create":
         content = json_message["commit"]["record"].get("text", "")
         if content:
             vulnerability_ids = extract_vulnerability_ids(content)
@@ -262,7 +257,6 @@ async def process_jetstream_message(json_message):
                 print(f"Post URL: {url}")
                 print(f"Vulnerability IDs detected: {', '.join(vulnerability_ids)}")
                 push_sighting_to_vulnerability_lookup(url, vulnerability_ids)
-
 
 
 def main():

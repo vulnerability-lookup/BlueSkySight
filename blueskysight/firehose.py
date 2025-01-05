@@ -10,8 +10,7 @@ import websockets
 from blueskysight.utils import (
     get_post_url,
     push_sighting_to_vulnerability_lookup,
-    remove_case_insensitive_duplicates,
-    vulnerability_pattern,
+    extract_vulnerability_ids,
 )
 
 BSKY_FIREHOSE = "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"
@@ -360,17 +359,6 @@ def extract_textual_content(blocks):
         if block["data"].get("$type") == "app.bsky.feed.post"
         and "text" in block["data"]
     ]
-
-
-def extract_vulnerability_ids(content):
-    """
-    Extracts vulnerability IDs from post content using the predefined regex pattern.
-    """
-    matches = vulnerability_pattern.findall(content)
-    # Flatten the list of tuples to get only non-empty matched strings
-    return remove_case_insensitive_duplicates(
-        [match for match_tuple in matches for match in match_tuple if match]
-    )
 
 
 def main():

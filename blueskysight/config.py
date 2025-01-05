@@ -31,5 +31,7 @@ try:
     # For PyVulnerabilityLookup
     vulnerability_lookup_base_url = conf.vulnerability_lookup_base_url
     vulnerability_auth_token = conf.vulnerability_auth_token
+
+    vulnerability_patterns = conf.vulnerability_patterns
 except AttributeError:
     raise Exception("Missing configuration variable.")

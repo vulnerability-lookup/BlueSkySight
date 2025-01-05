@@ -9,8 +9,7 @@ from blueskysight.utils import (
     parse_car,
     parse_dag_cbor_object,
     push_sighting_to_vulnerability_lookup,
-    remove_case_insensitive_duplicates,
-    vulnerability_pattern,
+    extract_vulnerability_ids,
 )
 
 
@@ -22,7 +21,7 @@ async def stream():
     """
     while True:
         try:
-            print("Connecting to Bluesky firehose...")
+            print("Connecting to Bluesky firehose…")
             async with websockets.connect(
                 "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos",
                 ping_interval=20,
@@ -80,13 +79,7 @@ async def process_op(op, body, root, nodes):
     content = post.get("text", "")
 
     if content:
-        # Match vulnerabilities in the content
-        matches = vulnerability_pattern.findall(content)
-        vulnerability_ids = [
-            match for match_tuple in matches for match in match_tuple if match
-        ]
-        vulnerability_ids = remove_case_insensitive_duplicates(vulnerability_ids)
-
+        vulnerability_ids = extract_vulnerability_ids(content)
         if vulnerability_ids:
             url = await get_post_url(uri)
             print(f"Post URL: {url}")
