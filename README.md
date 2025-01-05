@@ -20,7 +20,7 @@ You must then set an environment variable (``BLUESKYSIGHT_CONFIG``) with the ful
 
 You can have a look at [this example](https://github.com/CIRCL/BlueSkySight/blob/main/blueskysight/conf_sample.py) of configuration.
 
-### Streaming
+### Streaming the Firehose
 
 
 ``BlueSkySight-Stream`` streams data from the Bluesky firehose and uses PyVulnerabilityLookup to create sightings in Vulnerability-Lookup.
@@ -30,6 +30,23 @@ $ BlueSkySight-Stream
 Streaming Bluesky firehose…
 ```
 
+### Streaming a Jetstream service
+
+```bash
+BlueSkySight-Jetstream --help
+usage: BlueSkySight-Jetstream [-h] [--collections COLLECTIONS] [--geo {us-east,us-west}] [--instance {1,2}]
+
+Connect to a Jetstream service.
+
+options:
+  -h, --help            show this help message and exit
+  --collections COLLECTIONS
+                        The collections to subscribe to. If not provided, subscribe to all.
+  --geo {us-east,us-west}
+                        Region of the Jetstream service.
+  --instance {1,2}      Instance of the Jetstream service.
+```
+
 
 ## License
 
@@ -37,6 +54,6 @@ Streaming Bluesky firehose…
 [GNU General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ~~~
-Copyright (c) 2024 Computer Incident Response Center Luxembourg (CIRCL)
-Copyright (C) 2024 Cédric Bonhomme - https://github.com/cedricbonhomme
+Copyright (c) 2024-2025 Computer Incident Response Center Luxembourg (CIRCL)
+Copyright (C) 2024-2025 Cédric Bonhomme - https://github.com/cedricbonhomme
 ~~~

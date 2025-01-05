@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import json
 import os
@@ -252,7 +253,36 @@ async def jetstream(
 
 
 def main():
-    asyncio.run(jetstream())
+    parser = argparse.ArgumentParser(
+        prog="BlueSkySight-Jetstream", description="Connect to a Jetstream service."
+    )
+    parser.add_argument(
+        "--collections",
+        default=["app.bsky.feed.post"],
+        help="The collections to subscribe to. If not provided, subscribe to all.",
+    )
+    parser.add_argument(
+        "--geo",
+        default="us-west",
+        choices=["us-east", "us-west"],
+        help="Region of the Jetstream service.",
+    )
+    parser.add_argument(
+        "--instance",
+        default="1",
+        choices=["1", "2"],
+        help="Instance of the Jetstream service.",
+    )
+
+    arguments = parser.parse_args()
+
+    asyncio.run(
+        jetstream(
+            collections=arguments.collections,
+            geo=arguments.geo,
+            instance=arguments.instance,
+        )
+    )
 
 
 if __name__ == "__main__":
