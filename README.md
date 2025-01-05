@@ -33,7 +33,7 @@ Streaming Bluesky firehose…
 ### Streaming a Jetstream service
 
 ```bash
-BlueSkySight-Jetstream --help
+$ BlueSkySight-Jetstream --help
 usage: BlueSkySight-Jetstream [-h] [--collections COLLECTIONS] [--geo {us-east,us-west}] [--instance {1,2}]
 
 Connect to a Jetstream service.
