@@ -1,8 +1,8 @@
 # BlueSkySight
 
-A client to gather vulnerability-related information from the Bluesky.
-The gathered data is subsequently transmitted to the
-[Vulnerability-Lookup](https://github.com/cve-search/vulnerability-lookup) API.
+A client to gather vulnerability-related information from Bluesky.
+The collected data is then sent to the
+[Vulnerability-Lookup](https://github.com/cve-search/vulnerability-lookup) API as sightings.
 
 
 ### Installation
