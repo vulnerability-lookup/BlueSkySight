@@ -1,5 +1,15 @@
 # Changelog
 
+## Release 0.5.0 (2025-01-06)
+
+The initial code for connecting to BlueSky's firehose has been replaced with
+a better implementation. However, the original code is still available and can
+be executed using the command `BlueSkySight-Firehose-v1`, while the new default
+implementation can be executed with `BlueSkySight-Firehose`.
+
+The command to connect to BlueSky's firehose via Jetstream remains unchanged.
+
+
 ## Release 0.4.0 (2025-01-06)
 
 ### New
