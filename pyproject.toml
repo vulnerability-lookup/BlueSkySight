@@ -32,8 +32,8 @@ include = [
 ]
 
 [tool.poetry.scripts]
-BlueSkySight-Firehose = "blueskysight.stream:main"
-BlueSkySight-Firehose-v2 = "blueskysight.firehose:main"
+BlueSkySight-Firehose-v1 = "blueskysight.stream:main"
+BlueSkySight-Firehose = "blueskysight.firehose:main"
 BlueSkySight-Jetstream = "blueskysight.jetstream:main"
 
 [tool.poetry.dependencies]
