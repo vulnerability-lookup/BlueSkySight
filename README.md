@@ -15,15 +15,15 @@ $ pipx install BlueSkySight
 $ export BLUESKYSIGHT_CONFIG=~/.BlueSkySight/conf.py
 ```
 
-The configuration for BlueSkySight should be defined in a Python file (e.g., ``~/.BlueSkySight/conf.py``).
+The configuration should be defined in a Python file (e.g., ``~/.BlueSkySight/conf.py``).
 You must then set an environment variable (``BLUESKYSIGHT_CONFIG``) with the full path to this file.
 
 You can have a look at [this example](https://github.com/CIRCL/BlueSkySight/blob/main/blueskysight/conf_sample.py) of configuration.
 
+
 ### Streaming the Firehose
 
-
-``BlueSkySight-Firehose`` streams data from the Bluesky firehose and uses PyVulnerabilityLookup to create sightings in Vulnerability-Lookup.
+``BlueSkySight-Firehose`` streams data from the Bluesky's firehose and uses PyVulnerabilityLookup to create sightings in Vulnerability-Lookup.
 
 ```bash
 $ BlueSkySight-Firehose   
@@ -32,6 +32,8 @@ Connection established.
 ```
 
 ### Streaming a Jetstream service
+
+``BlueSkySight-Jetstream`` connects to Bluesky's firehose via Jetstream.
 
 ```bash
 $ BlueSkySight-Jetstream --help
