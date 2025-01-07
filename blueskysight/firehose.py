@@ -8,9 +8,9 @@ from io import BytesIO
 import websockets
 
 from blueskysight.utils import (
+    extract_vulnerability_ids,
     get_post_url,
     push_sighting_to_vulnerability_lookup,
-    extract_vulnerability_ids,
 )
 
 BSKY_FIREHOSE = "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"

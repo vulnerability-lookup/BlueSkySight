@@ -5,11 +5,11 @@ import websockets
 
 from blueskysight.utils import (
     enumerate_mst_records,
+    extract_vulnerability_ids,
     get_post_url,
     parse_car,
     parse_dag_cbor_object,
     push_sighting_to_vulnerability_lookup,
-    extract_vulnerability_ids,
 )
 
 
