@@ -35,3 +35,8 @@ try:
     vulnerability_patterns = conf.vulnerability_patterns
 except AttributeError:
     raise Exception("Missing configuration variable.")
+
+try:
+    ignore = conf.ignore
+except Exception:
+    ignore = []

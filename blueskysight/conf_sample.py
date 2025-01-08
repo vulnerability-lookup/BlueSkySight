@@ -1,6 +1,5 @@
 import re
 
-
 vulnerability_lookup_base_url = "https://vulnerability.circl.lu/"
 vulnerability_auth_token = ""
 
@@ -14,3 +13,6 @@ vulnerability_patterns = re.compile(
     r"|\b(RHSA-\d{4}:\d{4})\b",  # RedHat pattern
     re.IGNORECASE,
 )
+
+# DID of accounts to ignore
+ignore = ["did:plc:xrwz7tco7wyptkqee3wbjmci"]

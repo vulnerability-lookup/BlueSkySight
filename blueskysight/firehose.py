@@ -7,6 +7,7 @@ from io import BytesIO
 
 import websockets
 
+from blueskysight import config
 from blueskysight.utils import (
     extract_vulnerability_ids,
     get_post_url,
@@ -305,7 +306,10 @@ async def process_firehose(ws):
         try:
             cbor_frame = await ws.recv()
             header, body = read_firehose_frame(cbor_frame)
-            if header.get("t") == "#commit":
+            if (
+                header.get("t") == "#commit"
+                and body.get("repo", "") not in config.ignore
+            ):
                 await process_commit_frame(body)
         except websockets.ConnectionClosedError:
             print("WebSocket connection lost during processing.")
