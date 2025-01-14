@@ -10,9 +10,11 @@ vulnerability_patterns = re.compile(
     r"|\b(GSD-\d{4}-\d{4,5})\b"  # GSD pattern
     r"|\b(wid-sec-w-\d{4}-\d{4})\b"  # CERT-Bund pattern
     r"|\b(cisco-sa-\d{8}-[a-zA-Z0-9]+)\b"  # CISCO pattern
-    r"|\b(RHSA-\d{4}:\d{4})\b",  # RedHat pattern
+    r"|\b(RHSA-\d{4}:\d{4})\b"  # RedHat pattern
+    r"|\b(msrc_CVE-\d{4}-\d{4,})\b",  # MSRC CVE pattern
     re.IGNORECASE,
 )
+
 
 # DID of accounts to ignore
 ignore = ["did:plc:xrwz7tco7wyptkqee3wbjmci"]
