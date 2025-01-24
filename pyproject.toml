@@ -6,8 +6,8 @@ authors = ["Cédric Bonhomme <cedric.bonhomme@circl.lu>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
 
-homepage = "https://github.com/CIRCL/BlueSkySight"
-repository = "https://github.com/CIRCL/BlueSkySight"
+homepage = "https://github.com/vulnerability-lookup/BlueSkySight"
+repository = "https://github.com/vulnerability-lookup/BlueSkySight"
 
 keywords = ["Vulnerability-Lookup", "Vulnerability", "CVE", "Bluesky"]
 

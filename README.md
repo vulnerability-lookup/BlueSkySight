@@ -18,7 +18,7 @@ $ export BLUESKYSIGHT_CONFIG=~/.BlueSkySight/conf.py
 The configuration should be defined in a Python file (e.g., ``~/.BlueSkySight/conf.py``).
 You must then set an environment variable (``BLUESKYSIGHT_CONFIG``) with the full path to this file.
 
-You can have a look at [this example](https://github.com/CIRCL/BlueSkySight/blob/main/blueskysight/conf_sample.py) of configuration.
+You can have a look at [this example](https://github.com/CIRCL/vulnerability-lookup/blob/main/blueskysight/conf_sample.py) of configuration.
 
 
 ### Streaming the Firehose
@@ -58,7 +58,7 @@ Connection established. Listening for messages…
 
 ## License
 
-[BlueSkySight](https://github.com/CIRCL/BlueSkySight) is licensed under
+[BlueSkySight](https://github.com/vulnerability-lookup/BlueSkySight) is licensed under
 [GNU General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.html)
 
 ~~~
