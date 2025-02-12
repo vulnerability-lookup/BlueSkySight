@@ -40,3 +40,11 @@ try:
     ignore = conf.ignore
 except Exception:
     ignore = []
+
+
+try:
+    heartbeat_enabled = True
+    valkey_host = conf.valkey_host
+    valkey_port = conf.valkey_port
+except Exception:
+    heartbeat_enabled = False

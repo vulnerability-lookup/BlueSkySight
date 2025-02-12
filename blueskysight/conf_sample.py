@@ -20,3 +20,9 @@ vulnerability_patterns = re.compile(
 
 # DID of accounts to ignore
 ignore = ["did:plc:xrwz7tco7wyptkqee3wbjmci"]
+
+
+# Hearbeat mechanism
+heartbeat_enabled = True
+valkey_host = "127.0.0.1"
+valkey_port = 10002

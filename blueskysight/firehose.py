@@ -1,10 +1,12 @@
 import asyncio
 import json
 import struct
+import time
 import typing as t
 from base64 import b32encode
 from io import BytesIO
 
+import valkey
 import websockets
 
 from blueskysight import config
@@ -365,8 +367,43 @@ def extract_textual_content(blocks):
     ]
 
 
+async def heartbeat():
+    """Sends a heartbeat in the Valkey datastore."""
+    client = valkey.Valkey(config.valkey_host, config.valkey_port)
+    while True:
+        try:
+            # Set key with a TTL of 3600 seconds
+            client.set("script_blueskysight_heartbeat", time.time(), ex=3600)
+        except Exception as e:
+            print(f"Heartbeat error: {e}")
+            raise  # Propagate the error to stop the process
+        await asyncio.sleep(30)  # Heartbeat every 30 seconds
+
+
+async def launch_with_hearbeat():
+    """Launch the heartbeat within the same event loop as the firehose coroutine."""
+    tasks = [asyncio.create_task(heartbeat()), asyncio.create_task(firehose())]
+    try:
+        # Wait for all tasks, but stop on the first exception
+        await asyncio.gather(*tasks)
+    except Exception as e:
+        print(f"Error detected: {e}")
+        # Cancel remaining tasks (like heartbeat)
+        for task in tasks:
+            task.cancel()
+        # Wait until all tasks are properly cancelled
+        await asyncio.gather(*tasks, return_exceptions=True)
+        # Re-raise the exception to propagate it
+        raise
+
+
 def main():
-    asyncio.run(firehose())
+    if config.heartbeat_enabled:
+        # Execute the firehose() coroutine within the same event loop as the heartbeat for monitoring
+        asyncio.run(launch_with_hearbeat())
+    else:
+        # No monitoring of the process
+        asyncio.run(firehose())
 
 
 if __name__ == "__main__":
