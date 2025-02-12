@@ -372,8 +372,11 @@ async def heartbeat():
     client = valkey.Valkey(config.valkey_host, config.valkey_port)
     while True:
         try:
-            # Set key with a TTL of 3600 seconds
-            client.set("script_blueskysight_heartbeat", time.time(), ex=3600)
+            client.set(
+                "process_BlueskySight_heartbeat",
+                time.time(),
+                ex=config.expiration_period,
+            )
         except Exception as e:
             print(f"Heartbeat error: {e}")
             raise  # Propagate the error to stop the process

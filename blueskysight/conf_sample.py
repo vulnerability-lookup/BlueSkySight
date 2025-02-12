@@ -26,3 +26,4 @@ ignore = ["did:plc:xrwz7tco7wyptkqee3wbjmci"]
 heartbeat_enabled = True
 valkey_host = "127.0.0.1"
 valkey_port = 10002
+expiration_period = 3600
