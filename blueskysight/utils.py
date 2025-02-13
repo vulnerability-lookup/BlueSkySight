@@ -1,13 +1,51 @@
+import asyncio
 import base64
 import hashlib
 import io
 import struct
+import time
 from enum import Enum
 
 import httpx
+import valkey
 from pyvulnerabilitylookup import PyVulnerabilityLookup
 
 from blueskysight import config
+
+if config.heartbeat_enabled:
+    valkey_client = valkey.Valkey(config.valkey_host, config.valkey_port)
+
+
+async def heartbeat(key="process_heartbeat_BlueskySight") -> None:
+    """Sends a heartbeat in the Valkey datastore."""
+    if not config.heartbeat_enabled:
+        return
+    while True:
+        try:
+            valkey_client.set(
+                key,
+                time.time(),
+                ex=config.expiration_period,
+            )
+        except Exception as e:
+            print(f"Heartbeat error: {e}")
+            raise  # Propagate the error to stop the process
+        await asyncio.sleep(30)  # Heartbeat every 30 seconds
+
+
+async def report_error(
+    level="warning", message="", key="process_logs_BlueskySight"
+) -> None:
+    """Reports an error or warning in the Valkey datastore."""
+    timestamp = time.time()
+    log_entry = {"timestamp": timestamp, "level": level, "message": message}
+    try:
+        # Add the log entry to a list, so multiple messages are preserved
+        valkey_client.rpush(key, str(log_entry))
+        valkey_client.expire(key, 86400)  # Expire after 24 hours
+    except Exception as e:
+        print(f"Error reporting failure: {e}")
+        raise
 
 
 def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids):

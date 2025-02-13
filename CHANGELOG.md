@@ -1,5 +1,13 @@
 # Changelog
 
+## Release 1.0.0 (2025-02-13)
+
+This release introduces the capability to report errors, warnings,
+and heartbeats to a Valkey datastore, facilitating centralized monitoring.
+Events are reported using Python coroutines, with the heartbeat integrated
+into the main event loop.
+
+
 ## Release 0.5.0 (2025-01-06)
 
 The initial code for connecting to BlueSky's firehose has been replaced with

@@ -4,15 +4,17 @@ import json
 import os
 import platform
 import typing as t
-import websockets
 from pathlib import Path
 from urllib.parse import urlencode
 
+import websockets
 import zstandard as zstd
 
+from blueskysight import config
 from blueskysight.utils import (
     extract_vulnerability_ids,
     get_post_url,
+    heartbeat,
     push_sighting_to_vulnerability_lookup,
 )
 
@@ -259,6 +261,26 @@ async def process_jetstream_message(json_message):
                 push_sighting_to_vulnerability_lookup(url, vulnerability_ids)
 
 
+async def launch_with_hearbeat():
+    """Launch the heartbeat within the same event loop as the firehose coroutine."""
+    tasks = [
+        asyncio.create_task(heartbeat("process_heartbeat_BlueskySight-Jetstream")),
+        asyncio.create_task(jetstream()),
+    ]
+    try:
+        # Wait for all tasks, but stop on the first exception
+        await asyncio.gather(*tasks)
+    except Exception as e:
+        print(f"Error detected: {e}")
+        # Cancel remaining tasks (like heartbeat)
+        for task in tasks:
+            task.cancel()
+        # Wait until all tasks are properly cancelled
+        await asyncio.gather(*tasks, return_exceptions=True)
+        # Re-raise the exception to propagate it
+        raise
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="BlueSkySight-Jetstream", description="Connect to a Jetstream service."
@@ -283,13 +305,18 @@ def main():
 
     arguments = parser.parse_args()
 
-    asyncio.run(
-        jetstream(
-            collections=arguments.collections,
-            geo=arguments.geo,
-            instance=arguments.instance,
+    if config.heartbeat_enabled:
+        # Execute the firehose() coroutine within the same event loop as the heartbeat for monitoring
+        asyncio.run(launch_with_hearbeat())
+    else:
+        # No monitoring of the process
+        asyncio.run(
+            jetstream(
+                collections=arguments.collections,
+                geo=arguments.geo,
+                instance=arguments.instance,
+            )
         )
-    )
 
 
 if __name__ == "__main__":

@@ -1,19 +1,19 @@
 import asyncio
 import json
 import struct
-import time
 import typing as t
 from base64 import b32encode
 from io import BytesIO
 
-import valkey
 import websockets
 
 from blueskysight import config
 from blueskysight.utils import (
     extract_vulnerability_ids,
     get_post_url,
+    heartbeat,
     push_sighting_to_vulnerability_lookup,
+    report_error,
 )
 
 BSKY_FIREHOSE = "wss://bsky.network/xrpc/com.atproto.sync.subscribeRepos"
@@ -294,8 +294,12 @@ async def firehose():
                 await process_firehose(ws)
         except websockets.ConnectionClosedError as e:
             print(f"Connection closed unexpectedly: {e}. Reconnecting…")
+            await report_error(
+                "error", f"Connection closed unexpectedly: {e}. Reconnecting…"
+            )
         except Exception as e:
             print(f"Unexpected error: {e}. Reconnecting…")
+            await report_error("error", f"Unexpected error: {e}. Reconnecting…")
         finally:
             await asyncio.sleep(5)  # Delay before attempting reconnection
 
@@ -315,9 +319,11 @@ async def process_firehose(ws):
                 await process_commit_frame(body)
         except websockets.ConnectionClosedError:
             print("WebSocket connection lost during processing.")
+            await report_error("error", "WebSocket connection lost during processing.")
             raise
         except Exception as e:
             print(f"Error while processing frame: {e}")
+            await report_error("error", f"Error while processing frame: {e}")
 
 
 async def process_commit_frame(body):
@@ -367,22 +373,6 @@ def extract_textual_content(blocks):
     ]
 
 
-async def heartbeat():
-    """Sends a heartbeat in the Valkey datastore."""
-    client = valkey.Valkey(config.valkey_host, config.valkey_port)
-    while True:
-        try:
-            client.set(
-                "process_BlueskySight_heartbeat",
-                time.time(),
-                ex=config.expiration_period,
-            )
-        except Exception as e:
-            print(f"Heartbeat error: {e}")
-            raise  # Propagate the error to stop the process
-        await asyncio.sleep(30)  # Heartbeat every 30 seconds
-
-
 async def launch_with_hearbeat():
     """Launch the heartbeat within the same event loop as the firehose coroutine."""
     tasks = [asyncio.create_task(heartbeat()), asyncio.create_task(firehose())]
@@ -391,6 +381,7 @@ async def launch_with_hearbeat():
         await asyncio.gather(*tasks)
     except Exception as e:
         print(f"Error detected: {e}")
+        await report_error("error", f"Error detected: {e}")
         # Cancel remaining tasks (like heartbeat)
         for task in tasks:
             task.cancel()
