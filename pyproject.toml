@@ -86,7 +86,7 @@ warn_unreachable = true
 show_error_context = true
 pretty = true
 
-exclude = "build|dist|docs|blueskysight.egg-info"
+exclude = "build|dist|docs"
 
 [tool.isort]
 profile = "black"
