@@ -21,6 +21,25 @@ You must then set an environment variable (``BLUESKYSIGHT_CONFIG``) with the ful
 You can have a look at [this example](https://github.com/CIRCL/vulnerability-lookup/blob/main/blueskysight/conf_sample.py) of configuration.
 
 
+### With Docker
+
+```bash
+git clone https://github.com/vulnerability-lookup/BlueSkySight
+cd BlueSkySight
+
+# Make sure conf.py exists in the project root before running
+docker compose up --build
+```
+
+> [!NOTE]
+> The docker-compose.yml expects a conf.py file in the root directory.
+> You can create it manually or copy the provided example:
+> 
+> ```bash
+> $ cp blueskysight/conf_sample.py conf.py
+> ```
+
+
 ### Streaming the Firehose
 
 ``BlueSkySight-Firehose`` streams data from the Bluesky's firehose and uses PyVulnerabilityLookup to create sightings in Vulnerability-Lookup.
