@@ -1,0 +1,17 @@
+name: "BlueSkySight sighting client"
+
+services:
+
+  bss_client:
+    image: vuln_lookup_bss_client
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - APP_IMAGE=python:3.11-slim
+    restart: always
+    environment:
+      - PYTHONUNBUFFERED=TRUE
+      - BLUESKYSIGHT_CONFIG=/etc/conf.py
+    volumes:
+      - "./blueskysight/conf.py:/etc/conf.py"
