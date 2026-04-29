@@ -48,7 +48,7 @@ async def report_error(
         raise
 
 
-def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids):
+def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids, content=None):
     """Create a sighting from an incoming status and push it to the Vulnerability Lookup instance."""
     print("Pushing sighting to Vulnerability Lookup…")
     vuln_lookup = PyVulnerabilityLookup(
@@ -57,6 +57,8 @@ def push_sighting_to_vulnerability_lookup(status_uri, vulnerability_ids):
     for vuln in vulnerability_ids:
         # Create the sighting
         sighting = {"type": "seen", "source": status_uri, "vulnerability": vuln}
+        if content is not None:
+            sighting["content"] = content
 
         # Post the JSON to Vulnerability Lookup
         try:

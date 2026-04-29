@@ -358,7 +358,11 @@ async def process_blocks(uri, blocks):
                 url = await get_post_url(uri)
                 print(f"Post URL: {url}")
                 print(f"Vulnerability IDs detected: {', '.join(vulnerability_ids)}")
-                push_sighting_to_vulnerability_lookup(url, vulnerability_ids)
+                push_sighting_to_vulnerability_lookup(
+                    url,
+                    vulnerability_ids,
+                    content=content if config.include_post_content else None,
+                )
 
 
 def extract_textual_content(blocks):

@@ -41,6 +41,11 @@ try:
 except Exception:
     ignore = []
 
+try:
+    include_post_content = bool(conf.include_post_content)
+except AttributeError:
+    include_post_content = False
+
 
 try:
     heartbeat_enabled = True

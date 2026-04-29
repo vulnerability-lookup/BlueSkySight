@@ -1,5 +1,19 @@
 # Changelog
 
+## Release 1.2.0 (2026-04-29)
+
+### New
+
+- `BlueSkySight-Firehose` can now include the full post text in the sighting
+  sent to Vulnerability-Lookup. Set `include_post_content = True` in the
+  configuration file to enable it (defaults to `False`).
+
+### Improvements
+
+- Widened the `pyvulnerabilitylookup` dependency constraint to `>=2.0.0,<5.0.0`.
+- Declared support for Python 3.13 and 3.14.
+
+
 ## Release 1.0.0 (2025-02-13)
 
 This release introduces the capability to report errors, warnings,

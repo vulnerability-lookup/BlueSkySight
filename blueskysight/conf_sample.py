@@ -21,6 +21,9 @@ vulnerability_patterns = re.compile(
 # DID of accounts to ignore
 ignore = ["did:plc:xrwz7tco7wyptkqee3wbjmci"]
 
+# Include the full post text in the sighting sent to Vulnerability-Lookup
+include_post_content = False
+
 
 # Hearbeat mechanism
 heartbeat_enabled = True
